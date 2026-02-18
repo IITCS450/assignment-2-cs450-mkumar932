@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+p->priority = 1;
 
   release(&ptable.lock);
 
@@ -495,6 +496,26 @@ kill(int pid)
   release(&ptable.lock);
   return -1;
 }
+
+int
+setpriority(int pid, int prio)
+{
+struct proc *p;
+if(prio < 0 || prio > 2)
+return -1;
+
+acquire(&ptable.lock);
+for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+if(p->pid == pid){
+p->priority = prio;
+release(&ptable.lock);
+return 0;
+}
+}
+release(&ptable.lock);
+return -1;
+}
+
 
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
